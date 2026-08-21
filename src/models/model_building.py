@@ -54,7 +54,7 @@ def load_params(params_path: str) -> dict:
 
 
 def load_data(path: str) -> pd.DataFrame:
-    """Load the tfidf feature CSV."""
+    """Load the Bag-of-Words feature CSV."""
     try:
         df = pd.read_csv(path)
         logger.info("Loaded data from %s | shape=%s", path, df.shape)
@@ -127,7 +127,7 @@ def main() -> None:
     try:
         params = load_params('params.yaml')
 
-        train_data = load_data("./data/features/train_tfidf.csv")
+        train_data = load_data("./data/features/train_bog.csv")
         X_train, y_train = split_features_labels(train_data)
 
         xgb_model = train_model(
