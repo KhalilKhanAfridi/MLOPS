@@ -5,7 +5,7 @@ from typing import Tuple
 import numpy as np
 import pandas as pd
 import yaml
-from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 # ------------------------- Logging setup -------------------------
 logger = logging.getLogger("feature_engineering")
@@ -70,12 +70,12 @@ def load_data(path: str) -> pd.DataFrame:
         raise
 
 
-def apply_bow(
+def apply_tfidf(
     train_data: pd.DataFrame,
     test_data: pd.DataFrame,
     max_features: int
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """Apply Bag-of-Words (CountVectorizer) to train and test content columns."""
+    """Apply TF-IDF (TfidfVectorizer) to train and test content columns."""
     try:
         X_train = train_data['content'].values
         y_train = train_data['sentiment'].values
@@ -83,19 +83,19 @@ def apply_bow(
         X_test = test_data['content'].values
         y_test = test_data['sentiment'].values
 
-        vectorizer = CountVectorizer(max_features=max_features)
+        vectorizer = TfidfVectorizer(max_features=max_features)
 
-        X_train_bow = vectorizer.fit_transform(X_train)
-        X_test_bow = vectorizer.transform(X_test)
+        X_train_tfidf = vectorizer.fit_transform(X_train)
+        X_test_tfidf = vectorizer.transform(X_test)
 
-        train_df = pd.DataFrame(X_train_bow.toarray())
+        train_df = pd.DataFrame(X_train_tfidf.toarray())
         train_df['label'] = y_train
 
-        test_df = pd.DataFrame(X_test_bow.toarray())
+        test_df = pd.DataFrame(X_test_tfidf.toarray())
         test_df['label'] = y_test
 
         logger.info(
-            "Bag-of-Words applied | train_shape=%s test_shape=%s max_features=%s",
+            "TF-IDF applied | train_shape=%s test_shape=%s max_features=%s",
             train_df.shape, test_df.shape, max_features
         )
         return train_df, test_df
@@ -107,7 +107,7 @@ def apply_bow(
         logger.error("Value error during vectorization (check for empty/invalid text data): %s", e)
         raise
     except Exception as e:
-        logger.error("Unexpected error while applying Bag-of-Words: %s", e)
+        logger.error("Unexpected error while applying TF-IDF: %s", e)
         raise
 
 
@@ -115,8 +115,8 @@ def save_data(data_path: str, train_df: pd.DataFrame, test_df: pd.DataFrame) -> 
     """Save the feature-engineered train and test sets to disk."""
     try:
         os.makedirs(data_path, exist_ok=True)
-        train_path = os.path.join(data_path, "train_bog.csv")
-        test_path = os.path.join(data_path, "test_bog.csv")
+        train_path = os.path.join(data_path, "train_tfidf.csv")
+        test_path = os.path.join(data_path, "test_tfidf.csv")
 
         train_df.to_csv(train_path, index=False)
         test_df.to_csv(test_path, index=False)
@@ -141,7 +141,7 @@ def main() -> None:
         train_data = load_data("./data/processed/train_processed.csv")
         test_data = load_data("./data/processed/test_processed.csv")
 
-        train_df, test_df = apply_bow(train_data, test_data, max_features)
+        train_df, test_df = apply_tfidf(train_data, test_data, max_features)
 
         data_path = os.path.join("data", "features")
         save_data(data_path, train_df, test_df)

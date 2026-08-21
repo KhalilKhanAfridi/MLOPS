@@ -135,7 +135,7 @@ def main() -> None:
     try:
         xgb_model = load_model("model.pkl")
 
-        test_data = load_data("./data/features/test_bog.csv")
+        test_data = load_data("./data/features/test_tfidf.csv")
         X_test, y_test = split_features_labels(test_data)
 
         metrics = evaluate_model(xgb_model, X_test, y_test)
